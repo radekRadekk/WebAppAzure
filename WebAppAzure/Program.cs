@@ -3,6 +3,9 @@
 const string dbConnectionStringSecretName = "DbConnectionString";
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 var keyVaultAccessLambdaAddress = builder.Configuration.GetValue<string>("KeyVaultAccessLambdaAddress");
 
 using var httpClient = new HttpClient();
@@ -14,6 +17,9 @@ var dbConnectionString = await dbConnectionStringResponse.Content.ReadAsStringAs
 builder.Services.AddTransient<IPlayersRepository>(_ => new PlayersRepository(dbConnectionString));
 
 var app = builder.Build();
+
+app.Logger.LogInformation("keyVaultAccessLambdaAddress = {KeyVaultAccessLambdaAddress}", keyVaultAccessLambdaAddress);
+app.Logger.LogInformation("dbConnectionString = {DbConnectionString}", dbConnectionString);
 
 app.MapGet("/players", async (IPlayersRepository playersRepository) => await playersRepository.GetPlayers());
 app.MapGet("/players/{id:int}", async (IPlayersRepository playersRepository, int id) =>
