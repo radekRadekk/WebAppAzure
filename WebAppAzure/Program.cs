@@ -18,15 +18,18 @@ builder.Services.AddTransient<IPlayersRepository>(_ => new PlayersRepository(dbC
 
 var app = builder.Build();
 
-app.Logger.LogInformation("keyVaultAccessLambdaAddress = {KeyVaultAccessLambdaAddress}", keyVaultAccessLambdaAddress);
-app.Logger.LogInformation("dbConnectionString = {DbConnectionString}", dbConnectionString);
-
 app.MapGet("/players", async (IPlayersRepository playersRepository) => await playersRepository.GetPlayers());
 app.MapGet("/players/{id:int}", async (IPlayersRepository playersRepository, int id) =>
 {
     return await playersRepository.GetPlayer(id) is Player player
         ? Results.Ok(player)
         : Results.NotFound($"Player with given Id: {id} does not exist");
+});
+
+app.MapGet("/secrets/{name}", async (string name) =>
+{
+    var secretResponse = await httpClient.GetAsync($"{keyVaultAccessLambdaAddress}?name={name}");
+    return await dbConnectionStringResponse.Content.ReadAsStringAsync();
 });
 
 app.Run();
