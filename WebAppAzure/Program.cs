@@ -29,7 +29,7 @@ app.MapGet("/players/{id:int}", async (IPlayersRepository playersRepository, int
 app.MapGet("/secrets/{name}", async (string name) =>
 {
     var secretResponse = await httpClient.GetAsync($"{keyVaultAccessLambdaAddress}?name={name}");
-    return await dbConnectionStringResponse.Content.ReadAsStringAsync();
+    return await secretResponse.Content.ReadAsStringAsync();
 });
 
 app.Run();
